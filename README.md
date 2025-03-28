@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-# intelligent-document-insights-portal
->>>>>>> 5847d55b6dd00ff80a611c8a7c48532520d12562
 # Intelligent Document Insights Portal
 
 A powerful document analysis system powered by Azure AI services that helps organizations extract valuable insights from their documents. This system processes various document types (PDF, Word, text, images), analyzes them using advanced AI, and presents results in an intuitive dashboard.
@@ -165,8 +161,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 - Azure AI services for document intelligence capabilities
 - FastAPI and Flask for web framework functionality
-<<<<<<< HEAD
-- All contributors who have helped shape this project 
-=======
 - All contributors who have helped shape this project
->>>>>>> 5847d55b6dd00ff80a611c8a7c48532520d12562
