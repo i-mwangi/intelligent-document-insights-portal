@@ -1,0 +1,6 @@
+{
+    "text_analytics": {
+        "endpoint": "https://<YOUR_REGION>.api.cognitive.microsoft.com/text/analytics/v3.0/sentiment",
+        "key": "<YOUR_AZURE_TEXT_ANALYTICS_KEY>"
+    }
+}

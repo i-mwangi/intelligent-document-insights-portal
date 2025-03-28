@@ -1,0 +1,57 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: azure-variables
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.9'
+        addToPath: true
+        
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Install dependencies'
+      
+    - script: |
+        python -m pytest tests/
+      displayName: 'Run tests'
+      
+    - task: AzureKeyVault@2
+      inputs:
+        azureSubscription: 'Azure subscription'
+        KeyVaultName: '$(KeyVaultName)'
+        SecretsFilter: '*'
+        
+    - task: AzureAppServiceDeploy@2
+      inputs:
+        azureSubscription: 'Azure subscription'
+        appName: '$(AppName)'
+        package: '$(System.DefaultWorkingDirectory)'
+        
+- stage: Deploy
+  displayName: Deploy stage
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureFunctionApp@1
+            inputs:
+              azureSubscription: 'Azure subscription'
+              appName: '$(FunctionAppName)'
+              package: '$(System.DefaultWorkingDirectory)' 

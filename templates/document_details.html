@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Details - Azure AI Document Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .document-details {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #0078d4;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        .document-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .meta-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .meta-value {
+            font-size: 15px;
+        }
+        
+        .page-data {
+            margin-bottom: 30px;
+        }
+        
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        .document-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .document-table th,
+        .document-table td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .document-table th {
+            background-color: #f0f0f0;
+        }
+        
+        .content-preview {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <img src="{{ url_for('static', filename='images/azure-logo.png', _external=True) }}" alt="Azure Logo" onerror="this.src='https://azure.microsoft.com/svghandler/icon.svg';this.onerror='';">
+            <h1>Document Intelligence Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{ session.get('user_id', 'Guest') }}</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="dashboard-container">
+            <!-- Flash messages display -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-messages">
+                  {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            
+            <a href="{{ url_for('index') }}" class="back-btn">← Back to Dashboard</a>
+            
+            <div class="document-details">
+                <h2>Document Details: {{ document.filename }}</h2>
+                
+                <div class="document-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">File Name</div>
+                        <div class="meta-value">{{ document.filename }}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Status</div>
+                        <div class="meta-value">
+                            {% if document.status == 'completed' %}
+                            <span class="status-completed">Completed</span>
+                            {% else %}
+                            <span class="status-failed">Failed</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Processed On</div>
+                        <div class="meta-value">{{ document.timestamp }}</div>
+                    </div>
+                </div>
+                
+                {% if document.status == 'completed' %}
+                    {% if document.result.pages %}
+                    <div class="section">
+                        <div class="section-title">Page Content</div>
+                        <div class="page-data">
+                            {% for page in document.result.pages %}
+                            <h3>Page {{ page.page_number }}</h3>
+                            <div class="content-preview">
+                                {% for line in page.lines %}
+                                {{ line }}<br>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if document.result.tables %}
+                    <div class="section">
+                        <div class="section-title">Tables</div>
+                        {% for table in document.result.tables %}
+                        <div class="table-container">
+                            <h3>Table {{ loop.index }}</h3>
+                            <p>Rows: {{ table.row_count }}, Columns: {{ table.column_count }}</p>
+                            <table class="document-table">
+                                {% set rows = range(table.row_count) %}
+                                {% set cols = range(table.column_count) %}
+                                
+                                {% for row in rows %}
+                                <tr>
+                                    {% for col in cols %}
+                                        {% set cell_found = false %}
+                                        {% for cell in table.cells %}
+                                            {% if cell.row_index == row and cell.column_index == col %}
+                                                <td 
+                                                    {% if cell.row_span > 1 %}rowspan="{{ cell.row_span }}"{% endif %}
+                                                    {% if cell.column_span > 1 %}colspan="{{ cell.column_span }}"{% endif %}
+                                                >
+                                                    {{ cell.content }}
+                                                </td>
+                                                {% set cell_found = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if not cell_found %}
+                                            <td></td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if document.result.key_value_pairs %}
+                    <div class="section">
+                        <div class="section-title">Key-Value Pairs</div>
+                        <table class="document-table">
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                                <th>Confidence</th>
+                            </tr>
+                            {% for kv in document.result.key_value_pairs %}
+                            <tr>
+                                <td>{{ kv.key.content }}</td>
+                                <td>{{ kv.value.content }}</td>
+                                <td>{{ kv.confidence }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if document.result.entities %}
+                    <div class="section">
+                        <div class="section-title">Entities</div>
+                        <table class="document-table">
+                            <tr>
+                                <th>Entity</th>
+                                <th>Category</th>
+                                <th>Sub-Category</th>
+                                <th>Confidence</th>
+                            </tr>
+                            {% for entity in document.result.entities %}
+                            <tr>
+                                <td>{{ entity.content }}</td>
+                                <td>{{ entity.category }}</td>
+                                <td>{{ entity.sub_category }}</td>
+                                <td>{{ entity.confidence }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="section">
+                        <div class="section-title">Raw JSON Result</div>
+                        <pre>{{ document.result | tojson(indent=2) }}</pre>
+                    </div>
+                {% else %}
+                    <div class="section">
+                        <div class="section-title">Error</div>
+                        <div class="error-message">
+                            {{ document.error }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; {{ now.year }} Azure AI Document Intelligence Portal</p>
+    </footer>
+</body>
+</html> 

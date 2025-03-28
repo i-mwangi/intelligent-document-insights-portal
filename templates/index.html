@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Azure AI Document Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <img src="{{ url_for('static', filename='images/azure-logo.png', _external=True) }}" alt="Azure Logo" onerror="this.src='https://azure.microsoft.com/svghandler/icon.svg';this.onerror='';">
+            <h1>Document Intelligence Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome, {{ session.get('user_id', 'Guest') }}</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="dashboard-container">
+            <!-- Flash messages display -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-messages">
+                  {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                      {{ message }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            
+            <h2>Document Processing</h2>
+            <div class="upload-section">
+                <h3>Upload New Document</h3>
+                <form action="{{ url_for('flask_upload_document') }}" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+                    <button type="submit">Process Document</button>
+                </form>
+            </div>
+            
+            <div class="recent-documents">
+                <h3>Recent Documents</h3>
+                {% if documents %}
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Status</th>
+                            <th>Time Processed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc_id, doc in documents.items() %}
+                        <tr>
+                            <td>{{ doc.filename }}</td>
+                            <td>
+                                {% if doc.status == 'completed' %}
+                                <span class="status-completed">Completed</span>
+                                {% else %}
+                                <span class="status-failed">Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ doc.timestamp }}</td>
+                            <td>
+                                <a href="{{ url_for('document_details', document_id=doc.id) }}" class="view-btn">View Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No documents processed yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; {{ now.year }} Azure AI Document Intelligence Portal</p>
+    </footer>
+</body>
+</html> 

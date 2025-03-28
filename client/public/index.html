@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Intelligent Document Insights Portal"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Intelligent Document Insights Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script>
+      // Add error handling for root element
+      window.addEventListener('DOMContentLoaded', function() {
+        const rootElement = document.getElementById('root');
+        if (!rootElement) {
+          console.error('Root element not found! Please check your HTML structure.');
+        }
+      });
+    </script>
+
+    <header class="header">
+      <h1>Intelligent Document Insights Portal</h1>
+      <p>Unlock insights from your documents with the power of AI.</p>
+    </header>
+
+    <main class="upload-container">
+      <h2>Upload Your Document</h2>
+      <div class="upload-section">
+        <input type="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx,.txt">
+        <button class="file-button" onclick="document.getElementById('fileInput').click()">Choose File</button>
+        <p id="fileName">No file chosen</p>
+        <button class="process-button" onclick="uploadDocument()">Upload and Process</button>
+      </div>
+      <div class="progress-bar" id="progressBar"></div>
+      <div id="result" class="result-container"></div>
+    </main>
+
+    <footer class="footer">
+      <p>© 2025 Document Insights Portal. All rights reserved.</p>
+    </footer>
+
+    <script>
+      // Update file name when a file is selected
+      document.getElementById('fileInput').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'No file chosen';
+        document.getElementById('fileName').textContent = fileName;
+      });
+
+      // Handle file upload
+      async function uploadDocument() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (!file) {
+          alert('Please select a file first');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const progressBar = document.getElementById('progressBar');
+        const resultContainer = document.getElementById('result');
+        progressBar.style.width = '0%';
+        resultContainer.innerHTML = '<div class="status-message">Processing document...</div>';
+
+        try {
+          // Upload and process file
+          const response = await fetch('/api/upload/document', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Upload failed');
+          }
+
+          const result = await response.json();
+          
+          // Update progress bar
+          progressBar.style.width = '100%';
+          
+          // Display results
+          displayResult(result);
+        } catch (error) {
+          console.error('Error:', error);
+          resultContainer.innerHTML = `
+            <div class="error-message">
+              <h3>Error Processing Document</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Display results
+      function displayResult(result) {
+        const resultContainer = document.getElementById('result');
+        resultContainer.innerHTML = `
+          <div class="result-card">
+            <h3>Analysis Results</h3>
+            <div class="result-info">
+              <p><strong>Status:</strong> ${result.status}</p>
+              <p><strong>Processing Time:</strong> ${result.processing_time}</p>
+              <p><strong>File:</strong> ${result.file_info.filename}</p>
+              <p><strong>Size:</strong> ${(result.file_info.size / 1024).toFixed(2)} KB</p>
+            </div>
+            <div class="result-content">
+              <h4>Document Analysis</h4>
+              <pre>${JSON.stringify(result.result, null, 2)}</pre>
+            </div>
+          </div>
+        `;
+      }
+    </script>
+  </body>
+</html>

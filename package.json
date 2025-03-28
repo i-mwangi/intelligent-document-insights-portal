@@ -1,0 +1,25 @@
+{
+  "name": "intelligent-document-insights-portal",
+  "version": "1.0.0",
+  "description": "Intelligent Document Insights Portal using Azure AI services",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "concurrently \"python app.py\" \"cd client && npm start\"",
+    "install-all": "pip install -r requirements.txt && cd client && npm install",
+    "build": "cd client && npm run build",
+    "test": "python -m pytest"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+} 

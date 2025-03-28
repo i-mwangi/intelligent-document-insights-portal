@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ error_code }} - Azure AI Document Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin: 50px auto;
+            max-width: 600px;
+        }
+        
+        .error-code {
+            font-size: 80px;
+            color: #d9534f;
+            margin: 0;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            color: #333;
+            margin: 20px 0;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            background: #0078D4;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            background: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="error-container">
+            <h1 class="error-code">{{ error_code }}</h1>
+            <p class="error-message">{{ error_message }}</p>
+            <a href="{{ url_for('index') }}" class="back-link">Back to Home</a>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; {{ now.year }} Azure AI Document Intelligence Portal</p>
+    </footer>
+</body>
+</html> 
