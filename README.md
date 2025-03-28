@@ -161,4 +161,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 - Azure AI services for document intelligence capabilities
 - FastAPI and Flask for web framework functionality
-- All contributors who have helped shape this project 
+- All contributors who have helped shape this project
