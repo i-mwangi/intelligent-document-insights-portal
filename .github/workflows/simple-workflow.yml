@@ -1,0 +1,17 @@
+name: Simple Status Check
+
+on:
+  push:
+    branches: [ main, new-main ]
+  pull_request:
+    branches: [ main, new-main ]
+
+jobs:
+  simple-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Simple Check
+        run: |
+          echo "Repository was successfully updated!" 
